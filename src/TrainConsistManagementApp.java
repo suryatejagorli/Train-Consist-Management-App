@@ -1,7 +1,5 @@
-
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 class Bogie {
     private String type;
@@ -42,18 +40,31 @@ public class TrainConsistManagementApp {
                 new Bogie("AC Chair", 55)
         );
 
-
         Map<String, List<Bogie>> groupedBogies = bogies.stream()
                 .collect(Collectors.groupingBy(Bogie::getType));
 
-
         System.out.println("Grouped Bogies by Type:");
-        groupedBogies.forEach((type, bogieList) -> {
-            System.out.println(type + " -> " + bogieList);
-        });
-
+        groupedBogies.forEach((type, bogieList) ->
+                System.out.println(type + " -> " + bogieList)
+        );
 
         System.out.println("\nOriginal List remains unchanged:");
         bogies.forEach(System.out::println);
+
+        System.out.println("\nAfter Sorting by Capacity:");
+        List<Bogie> sortedBogies = bogies.stream()
+                .sorted(Comparator.comparingInt(Bogie::getCapacity))
+                .collect(Collectors.toList());
+
+        sortedBogies.forEach(System.out::println);
+
+        LinkedHashSet<String> trainFormation = new LinkedHashSet<>();
+        trainFormation.add("Engine");
+        trainFormation.add("Sleeper");
+        trainFormation.add("Cargo");
+        trainFormation.add("Guard");
+        trainFormation.add("Sleeper");
+
+        System.out.println("\nFinal Train Formation: " + trainFormation);
     }
 }
