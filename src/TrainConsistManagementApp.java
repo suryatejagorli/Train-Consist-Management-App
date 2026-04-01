@@ -57,6 +57,33 @@ class GoodsBogie {
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
 
+        List<Bogie> bogies = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            bogies.add(new Bogie("Sleeper", 50 + (i % 30)));
+        }
+
+        long startLoop = System.nanoTime();
+        List<Bogie> loopFiltered = new ArrayList<>();
+        for (Bogie b : bogies) {
+            if (b.getCapacity() > 60) {
+                loopFiltered.add(b);
+            }
+        }
+        long endLoop = System.nanoTime();
+        long loopTime = endLoop - startLoop;
+
+        long startStream = System.nanoTime();
+        List<Bogie> streamFiltered = bogies.stream()
+                .filter(b -> b.getCapacity() > 60)
+                .collect(Collectors.toList());
+        long endStream = System.nanoTime();
+        long streamTime = endStream - startStream;
+
+        System.out.println("Loop-based filtering result size: " + loopFiltered.size());
+        System.out.println("Stream-based filtering result size: " + streamFiltered.size());
+        System.out.println("Loop execution time (ns): " + loopTime);
+        System.out.println("Stream execution time (ns): " + streamTime);
+
         List<GoodsBogie> goodsBogies = Arrays.asList(
                 new GoodsBogie("Rectangular", "Coal"),
                 new GoodsBogie("Cylindrical", "Petroleum"),
@@ -81,7 +108,7 @@ public class TrainConsistManagementApp {
         System.out.println("\nGoods Bogies in Train:");
         goodsBogies.forEach(System.out::println);
 
-        List<Bogie> bogies = Arrays.asList(
+        List<Bogie> bogieList = Arrays.asList(
                 new Bogie("Sleeper", 72),
                 new Bogie("Sleeper", 70),
                 new Bogie("AC Chair", 60),
@@ -91,7 +118,7 @@ public class TrainConsistManagementApp {
                 new Bogie("AC Chair", 55)
         );
 
-        int totalSeats = bogies.stream()
+        int totalSeats = bogieList.stream()
                 .filter(b -> b.getType().equals("Sleeper") ||
                         b.getType().equals("AC Chair") ||
                         b.getType().equals("First Class"))
@@ -100,19 +127,19 @@ public class TrainConsistManagementApp {
 
         System.out.println("Total Seating Capacity of Train: " + totalSeats);
 
-        Map<String, List<Bogie>> groupedBogies = bogies.stream()
+        Map<String, List<Bogie>> groupedBogies = bogieList.stream()
                 .collect(Collectors.groupingBy(Bogie::getType));
 
         System.out.println("\nGrouped Bogies by Type:");
-        groupedBogies.forEach((type, bogieList) ->
-                System.out.println(type + " -> " + bogieList)
+        groupedBogies.forEach((type, list) ->
+                System.out.println(type + " -> " + list)
         );
 
         System.out.println("\nOriginal List remains unchanged:");
-        bogies.forEach(System.out::println);
+        bogieList.forEach(System.out::println);
 
         System.out.println("\nAfter Sorting by Capacity:");
-        List<Bogie> sortedBogies = bogies.stream()
+        List<Bogie> sortedBogies = bogieList.stream()
                 .sorted(Comparator.comparingInt(Bogie::getCapacity))
                 .collect(Collectors.toList());
 
