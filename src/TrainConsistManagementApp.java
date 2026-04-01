@@ -29,7 +29,6 @@ class Bogie {
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-
         List<Bogie> bogies = Arrays.asList(
                 new Bogie("Sleeper", 72),
                 new Bogie("Sleeper", 70),
@@ -40,10 +39,19 @@ public class TrainConsistManagementApp {
                 new Bogie("AC Chair", 55)
         );
 
+        int totalSeats = bogies.stream()
+                .filter(b -> b.getType().equals("Sleeper") ||
+                        b.getType().equals("AC Chair") ||
+                        b.getType().equals("First Class"))
+                .map(Bogie::getCapacity)
+                .reduce(0, Integer::sum);
+
+        System.out.println("Total Seating Capacity of Train: " + totalSeats);
+
         Map<String, List<Bogie>> groupedBogies = bogies.stream()
                 .collect(Collectors.groupingBy(Bogie::getType));
 
-        System.out.println("Grouped Bogies by Type:");
+        System.out.println("\nGrouped Bogies by Type:");
         groupedBogies.forEach((type, bogieList) ->
                 System.out.println(type + " -> " + bogieList)
         );
