@@ -1,4 +1,3 @@
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,18 +29,16 @@ class Bogie {
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // Step 1: Create a list of bogies
         List<Bogie> bogies = Arrays.asList(
                 new Bogie("Sleeper", 72),
                 new Bogie("Sleeper", 70),
                 new Bogie("AC Chair", 60),
                 new Bogie("First Class", 40),
-                new Bogie("Rectangular", 100),   // goods bogie, not counted in seats
-                new Bogie("Cylindrical", 80),    // goods bogie, not counted in seats
+                new Bogie("Rectangular", 100),
+                new Bogie("Cylindrical", 80),
                 new Bogie("AC Chair", 55)
         );
 
-        // Step 2: Extract capacities of passenger bogies only
         int totalSeats = bogies.stream()
                 .filter(b -> b.getType().equals("Sleeper") ||
                         b.getType().equals("AC Chair") ||
@@ -49,11 +46,33 @@ public class TrainConsistManagementApp {
                 .map(Bogie::getCapacity)
                 .reduce(0, Integer::sum);
 
-        // Step 3: Display result
         System.out.println("Total Seating Capacity of Train: " + totalSeats);
 
-        // Program continues...
+        Map<String, List<Bogie>> groupedBogies = bogies.stream()
+                .collect(Collectors.groupingBy(Bogie::getType));
+
+        System.out.println("\nGrouped Bogies by Type:");
+        groupedBogies.forEach((type, bogieList) ->
+                System.out.println(type + " -> " + bogieList)
+        );
+
         System.out.println("\nOriginal List remains unchanged:");
         bogies.forEach(System.out::println);
+
+        System.out.println("\nAfter Sorting by Capacity:");
+        List<Bogie> sortedBogies = bogies.stream()
+                .sorted(Comparator.comparingInt(Bogie::getCapacity))
+                .collect(Collectors.toList());
+
+        sortedBogies.forEach(System.out::println);
+
+        LinkedHashSet<String> trainFormation = new LinkedHashSet<>();
+        trainFormation.add("Engine");
+        trainFormation.add("Sleeper");
+        trainFormation.add("Cargo");
+        trainFormation.add("Guard");
+        trainFormation.add("Sleeper");
+
+        System.out.println("\nFinal Train Formation: " + trainFormation);
     }
 }
