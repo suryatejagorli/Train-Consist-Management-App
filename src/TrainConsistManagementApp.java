@@ -2,11 +2,20 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
 
-class Bogie {
+class InvalidCapacityException extends Exception {
+    public InvalidCapacityException(String message) {
+        super(message);
+    }
+}
+
+class PassengerBogie {
     private String type;
     private int capacity;
 
-    public Bogie(String type, int capacity) {
+    public PassengerBogie(String type, int capacity) throws InvalidCapacityException {
+        if (capacity <= 0) {
+            throw new InvalidCapacityException("Capacity must be greater than zero");
+        }
         this.type = type;
         this.capacity = capacity;
     }
@@ -21,7 +30,7 @@ class Bogie {
 
     @Override
     public String toString() {
-        return "Bogie{" +
+        return "PassengerBogie{" +
                 "type='" + type + '\'' +
                 ", capacity=" + capacity +
                 '}';
@@ -54,9 +63,53 @@ class GoodsBogie {
     }
 }
 
+class Bogie {
+    private String type;
+    private int capacity;
+
+    public Bogie(String type, int capacity) {
+        this.type = type;
+        this.capacity = capacity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    @Override
+    public String toString() {
+        return "Bogie{" +
+                "type='" + type + '\'' +
+                ", capacity=" + capacity +
+                '}';
+    }
+}
+
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
+        // Passenger bogie creation with exception handling
+        try {
+            PassengerBogie sleeper = new PassengerBogie("Sleeper", 72);
+            System.out.println("Created: " + sleeper);
 
+            PassengerBogie invalid = new PassengerBogie("AC Chair", -10);
+            System.out.println("Created: " + invalid);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Error creating bogie: " + e.getMessage());
+        }
+
+        try {
+            PassengerBogie zeroCapacity = new PassengerBogie("First Class", 0);
+            System.out.println("Created: " + zeroCapacity);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Error creating bogie: " + e.getMessage());
+        }
+
+        // Performance testing
         List<Bogie> bogies = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             bogies.add(new Bogie("Sleeper", 50 + (i % 30)));
@@ -84,6 +137,7 @@ public class TrainConsistManagementApp {
         System.out.println("Loop execution time (ns): " + loopTime);
         System.out.println("Stream execution time (ns): " + streamTime);
 
+        // Safety check for goods bogies
         List<GoodsBogie> goodsBogies = Arrays.asList(
                 new GoodsBogie("Rectangular", "Coal"),
                 new GoodsBogie("Cylindrical", "Petroleum"),
@@ -92,22 +146,14 @@ public class TrainConsistManagementApp {
         );
 
         boolean isSafe = goodsBogies.stream()
-                .allMatch(b -> {
-                    if (b.getType().equals("Cylindrical")) {
-                        return b.getCargo().equals("Petroleum");
-                    }
-                    return true;
-                });
+                .allMatch(b -> b.getType().equals("Cylindrical") ? b.getCargo().equals("Petroleum") : true);
 
-        if (isSafe) {
-            System.out.println("Train is safety compliant ✅");
-        } else {
-            System.out.println("Train is NOT safety compliant ❌");
-        }
+        System.out.println(isSafe ? "Train is safety compliant ✅" : "Train is NOT safety compliant ❌");
 
         System.out.println("\nGoods Bogies in Train:");
         goodsBogies.forEach(System.out::println);
 
+        // Bogie list for seating and formation
         List<Bogie> bogieList = Arrays.asList(
                 new Bogie("Sleeper", 72),
                 new Bogie("Sleeper", 70),
@@ -122,8 +168,8 @@ public class TrainConsistManagementApp {
                 .filter(b -> b.getType().equals("Sleeper") ||
                         b.getType().equals("AC Chair") ||
                         b.getType().equals("First Class"))
-                .map(Bogie::getCapacity)
-                .reduce(0, Integer::sum);
+                .mapToInt(Bogie::getCapacity)
+                .sum();
 
         System.out.println("Total Seating Capacity of Train: " + totalSeats);
 
@@ -131,9 +177,7 @@ public class TrainConsistManagementApp {
                 .collect(Collectors.groupingBy(Bogie::getType));
 
         System.out.println("\nGrouped Bogies by Type:");
-        groupedBogies.forEach((type, list) ->
-                System.out.println(type + " -> " + list)
-        );
+        groupedBogies.forEach((type, list) -> System.out.println(type + " -> " + list));
 
         System.out.println("\nOriginal List remains unchanged:");
         bogieList.forEach(System.out::println);
@@ -142,20 +186,16 @@ public class TrainConsistManagementApp {
         List<Bogie> sortedBogies = bogieList.stream()
                 .sorted(Comparator.comparingInt(Bogie::getCapacity))
                 .collect(Collectors.toList());
-
         sortedBogies.forEach(System.out::println);
 
-        LinkedHashSet<String> trainFormation = new LinkedHashSet<>();
-        trainFormation.add("Engine");
-        trainFormation.add("Sleeper");
-        trainFormation.add("Cargo");
-        trainFormation.add("Guard");
-        trainFormation.add("Sleeper");
+        LinkedHashSet<String> trainFormation = new LinkedHashSet<>(Arrays.asList(
+                "Engine", "Sleeper", "Cargo", "Guard", "Sleeper"
+        ));
 
         System.out.println("\nFinal Train Formation: " + trainFormation);
 
+        // Regex validation for Train ID and Cargo Code
         Scanner scanner = new Scanner(System.in);
-
         String trainIdRegex = "TRN-\\d{4}";
         String cargoCodeRegex = "PET-[A-Z]{2}";
 
@@ -169,18 +209,12 @@ public class TrainConsistManagementApp {
         String cargoCode = scanner.nextLine();
 
         Matcher trainIdMatcher = trainIdPattern.matcher(trainId);
-        if (trainIdMatcher.matches()) {
-            System.out.println("Train ID is valid: " + trainId);
-        } else {
-            System.out.println("Invalid Train ID format! Expected format: TRN-1234");
-        }
+        System.out.println(trainIdMatcher.matches() ? "Train ID is valid: " + trainId
+                : "Invalid Train ID format! Expected format: TRN-1234");
 
         Matcher cargoCodeMatcher = cargoCodePattern.matcher(cargoCode);
-        if (cargoCodeMatcher.matches()) {
-            System.out.println("Cargo Code is valid: " + cargoCode);
-        } else {
-            System.out.println("Invalid Cargo Code format! Expected format: PET-AB");
-        }
+        System.out.println(cargoCodeMatcher.matches() ? "Cargo Code is valid: " + cargoCode
+                : "Invalid Cargo Code format! Expected format: PET-AB");
 
         System.out.println("Validation complete. Proceeding with train operations...");
     }
