@@ -2,7 +2,6 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 class Bogie {
     private String type;
     private int capacity;
@@ -31,28 +30,29 @@ class Bogie {
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-
+        // Step 1: Create a list of bogies
         List<Bogie> bogies = Arrays.asList(
                 new Bogie("Sleeper", 72),
                 new Bogie("Sleeper", 70),
                 new Bogie("AC Chair", 60),
                 new Bogie("First Class", 40),
-                new Bogie("Rectangular", 100),
-                new Bogie("Cylindrical", 80),
+                new Bogie("Rectangular", 100),   // goods bogie, not counted in seats
+                new Bogie("Cylindrical", 80),    // goods bogie, not counted in seats
                 new Bogie("AC Chair", 55)
         );
 
+        // Step 2: Extract capacities of passenger bogies only
+        int totalSeats = bogies.stream()
+                .filter(b -> b.getType().equals("Sleeper") ||
+                        b.getType().equals("AC Chair") ||
+                        b.getType().equals("First Class"))
+                .map(Bogie::getCapacity)
+                .reduce(0, Integer::sum);
 
-        Map<String, List<Bogie>> groupedBogies = bogies.stream()
-                .collect(Collectors.groupingBy(Bogie::getType));
+        // Step 3: Display result
+        System.out.println("Total Seating Capacity of Train: " + totalSeats);
 
-
-        System.out.println("Grouped Bogies by Type:");
-        groupedBogies.forEach((type, bogieList) -> {
-            System.out.println(type + " -> " + bogieList);
-        });
-
-
+        // Program continues...
         System.out.println("\nOriginal List remains unchanged:");
         bogies.forEach(System.out::println);
     }
