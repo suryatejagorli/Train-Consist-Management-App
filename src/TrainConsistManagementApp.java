@@ -1,16 +1,17 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Bogie {
-    private String name;
+    private String type;
     private int capacity;
 
-    public Bogie(String name, int capacity) {
-        this.name = name;
+    public Bogie(String type, int capacity) {
+        this.type = type;
         this.capacity = capacity;
     }
 
-    public String getName() {
-        return name;
+    public String getType() {
+        return type;
     }
 
     public int getCapacity() {
@@ -19,41 +20,51 @@ class Bogie {
 
     @Override
     public String toString() {
-        return name + " (Capacity: " + capacity + ")";
+        return "Bogie{" +
+                "type='" + type + '\'' +
+                ", capacity=" + capacity +
+                '}';
     }
 }
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
 
-        List<Bogie> bogies = new ArrayList<>();
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("Sleeper", 70),
+                new Bogie("AC Chair", 60),
+                new Bogie("First Class", 40),
+                new Bogie("Rectangular", 100),
+                new Bogie("Cylindrical", 80),
+                new Bogie("AC Chair", 55)
+        );
 
-        bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("AC Chair", 56));
-        bogies.add(new Bogie("First Class", 24));
+        Map<String, List<Bogie>> groupedBogies = bogies.stream()
+                .collect(Collectors.groupingBy(Bogie::getType));
 
-        System.out.println("Before Sorting:");
-        for (Bogie b : bogies) {
-            System.out.println(b);
-        }
+        System.out.println("Grouped Bogies by Type:");
+        groupedBogies.forEach((type, bogieList) ->
+                System.out.println(type + " -> " + bogieList)
+        );
 
-        bogies.sort(Comparator.comparingInt(Bogie::getCapacity));
+        System.out.println("\nOriginal List remains unchanged:");
+        bogies.forEach(System.out::println);
 
         System.out.println("\nAfter Sorting by Capacity:");
-        for (Bogie b : bogies) {
-            System.out.println(b);
-        }
-import java.util.LinkedHashSet;
+        List<Bogie> sortedBogies = bogies.stream()
+                .sorted(Comparator.comparingInt(Bogie::getCapacity))
+                .collect(Collectors.toList());
 
-public class TrainConsistManagementApp {
-    public static void main(String[] args) {
+        sortedBogies.forEach(System.out::println);
+
         LinkedHashSet<String> trainFormation = new LinkedHashSet<>();
         trainFormation.add("Engine");
         trainFormation.add("Sleeper");
         trainFormation.add("Cargo");
         trainFormation.add("Guard");
-
         trainFormation.add("Sleeper");
-        System.out.println("Final Train Formation: " + trainFormation);
+
+        System.out.println("\nFinal Train Formation: " + trainFormation);
     }
 }
